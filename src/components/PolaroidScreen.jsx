@@ -66,9 +66,9 @@ export default function PolaroidScreen({ onReset }) {
           </div>
           
           <div className="flex flex-col items-center justify-center pt-2 pb-2 gap-3">
-            <p className="font-caveat text-4xl md:text-5xl text-slate-800 font-bold leading-[1.3] text-center px-2">Para mi bonita</p>
-            <p className="font-sans text-[10px] text-slate-400 uppercase tracking-widest text-center">{today}</p>
-          </div>
+  <p className="font-caveat text-3xl md:text-5xl text-slate-800 font-bold leading-[1.3] text-center px-2 whitespace-nowrap">Para mi bonita</p>
+  <p className="font-sans text-[10px] text-slate-400 uppercase tracking-widest text-center">{today}</p>
+</div>
         </div>
         
         {/* Tiny piece of tape holding it (Placed outside the capture area so it looks like it's holding the photo to the screen) */}
