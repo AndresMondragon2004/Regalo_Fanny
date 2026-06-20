@@ -65,9 +65,10 @@ export default function PolaroidScreen({ onReset }) {
              </svg>
           </div>
           
-          {/* Handwriting text */}
-          <p className="font-caveat text-4xl text-slate-800 font-bold mb-1">Para mi bonita</p>
-          <p className="font-sans text-[10px] text-slate-400 uppercase tracking-widest mt-1">{today}</p>
+          <div className="flex flex-col items-center justify-center pt-2 pb-2">
+            <p className="font-caveat text-4xl md:text-5xl text-slate-800 font-bold mb-3 leading-tight text-center">Para mi bonita</p>
+            <p className="font-sans text-[10px] text-slate-400 uppercase tracking-widest text-center">{today}</p>
+          </div>
         </div>
         
         {/* Tiny piece of tape holding it (Placed outside the capture area so it looks like it's holding the photo to the screen) */}
