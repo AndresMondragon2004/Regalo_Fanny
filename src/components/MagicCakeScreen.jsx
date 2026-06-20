@@ -1,73 +1,25 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { successVibrate } from '../utils/vibrate';
 
 export default function MagicCakeScreen({ text, onNext }) {
   const [candlesBlown, setCandlesBlown] = useState(false);
-  const [micError, setMicError] = useState(false);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const microphoneRef = useRef(null);
-  const reqFrameRef = useRef(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const initMic = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        if (!isMounted) return;
-        
-        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-        analyserRef.current = audioContextRef.current.createAnalyser();
-        microphoneRef.current = audioContextRef.current.createMediaStreamSource(stream);
-        
-        microphoneRef.current.connect(analyserRef.current);
-        analyserRef.current.fftSize = 256;
-        const bufferLength = analyserRef.current.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        
-        const checkVolume = () => {
-          if (!isMounted || candlesBlown) return;
-          analyserRef.current.getByteFrequencyData(dataArray);
-          
-          let sum = 0;
-          for(let i = 0; i < bufferLength; i++) {
-            sum += dataArray[i];
-          }
-          const average = sum / bufferLength;
-          
-          if (average > 90) {
-            triggerBlowOut();
-          } else {
-            reqFrameRef.current = requestAnimationFrame(checkVolume);
-          }
-        };
-        
-        checkVolume();
-      } catch (err) {
-        console.error("Mic access denied or error:", err);
-        setMicError(true);
-      }
-    };
-
-    initMic();
-
-    return () => {
-      isMounted = false;
-      if (reqFrameRef.current) cancelAnimationFrame(reqFrameRef.current);
-      if (microphoneRef.current) microphoneRef.current.disconnect();
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
-    };
-  }, [candlesBlown]);
+  const rubCountRef = useRef(0);
 
   const triggerBlowOut = () => {
     if (candlesBlown) return;
     setCandlesBlown(true);
     successVibrate();
+  };
+
+  const handleRub = () => {
+    if (candlesBlown) return;
+    rubCountRef.current += 1;
+    // Approx 15 touch moves is a very quick swipe/rub
+    if (rubCountRef.current > 15) {
+      triggerBlowOut();
+    }
   };
 
   return (
@@ -128,7 +80,7 @@ export default function MagicCakeScreen({ text, onNext }) {
             <motion.div 
               animate={{ scale: [1, 1.15, 0.85, 1.05], rotate: [-3, 3, -2, 2] }} 
               transition={{ repeat: Infinity, duration: 0.25 }}
-              className="absolute bottom-[200px] left-1/2 -translate-x-1/2 w-6 h-12 bg-gradient-to-t from-amber-500 via-yellow-300 to-yellow-100 rounded-[50%_50%_20%_20%] shadow-[0_0_40px_#fbbf24] z-40 origin-bottom"
+              className="absolute bottom-[200px] left-1/2 -translate-x-1/2 w-6 h-12 bg-gradient-to-t from-amber-500 via-yellow-300 to-yellow-100 rounded-[50%_50%_20%_20%] shadow-[0_0_40px_#fbbf24] z-40 origin-bottom pointer-events-none"
               style={{ filter: 'blur(0.5px)' }}
             />
           )}
@@ -142,9 +94,12 @@ export default function MagicCakeScreen({ text, onNext }) {
              />
           )}
 
+          {/* Hit area for rubbing/touching */}
           {!candlesBlown && (
-             <button 
-               className="absolute bottom-36 left-1/2 -translate-x-1/2 w-24 h-32 opacity-0 z-50 cursor-pointer" 
+             <div 
+               className="absolute bottom-36 left-1/2 -translate-x-1/2 w-40 h-48 z-50 cursor-pointer touch-none" 
+               onPointerMove={handleRub}
+               onTouchMove={handleRub}
                onClick={triggerBlowOut}
              />
           )}
@@ -152,7 +107,7 @@ export default function MagicCakeScreen({ text, onNext }) {
 
         {!candlesBlown ? (
           <p className="mt-8 text-rose-500 font-caveat text-3xl md:text-4xl animate-pulse">
-            {micError ? "Toca la velita para apagarla ✨" : "Acércate y sopla fuerte la velita..."}
+            Frota la velita para apagarla ✨
           </p>
         ) : (
           <motion.div 
